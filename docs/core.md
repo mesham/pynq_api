@@ -3,6 +3,7 @@
 This document describes the core PYNQ C API which is concerned around interaction with the ZYNQ IP block.
 
 * [Bitstream management](#bitstream-management)
+* [Memory-mapped IO (MMIO)](#memory-mapped-io-(mmio))
 
 ## Bitstream management
 
