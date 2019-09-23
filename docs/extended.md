@@ -74,3 +74,51 @@ This call will block and wait for a DMA transfer to complete. The _direction_ ca
 `int PYNQ_closeDMA(PYNQ_AXI_DMA* dma_state)`
 
 This call will close the connection to the DMA block, _dma_state_, and stop the DMA engines. An integer status code is returned indicating success or failure. 
+
+## High Level Synthesis (HLS)
+
+The PYNQ API provides abstraction over interaction with HLS blocks via the AXI-Lite control port. All these HLS calls should be issued from code running on the PS as sudo.
+
+### Opening an HLS block
+
+`int PYNQ_openHLS(PYNQ_HLS* hls_state, size_t address, size_t width)`
+
+Opens an HLS block at _address_, which is defined in the Vivado address editor, of size _width_ in bytes. The user should declare a variable of type _PYNQ_HLS_ in their code and pass a pointer to this, this variable is then the context of the opened HLS block. An integer status code is returned indicating success or failure. 
+
+### Starting the HLS kernel
+
+`int PYNQ_startHLS(PYNQ_HLS* hls_state)`
+
+This starts the HLS kernel of the block opened as _hls_state_, returning an integer status code is returned indicating success or failure. 
+
+### Testing for HLS kernel completion
+
+`int PYNQ_testHLSCompleted(PYNQ_HLS* hls_state, int* flag)`
+
+Tests whether the HLS kernel at block _hls_state_ has finished execution (completed) or not. This status is written into _flag_, zero indicating it has not completed (e.g. currently running) and above zero indicating it has completed. Internally this also accepts 0x00 as completion, so really represents whether the kernel is idle or not. An integer status code is returned indicating success or failure. 
+
+### Waiting for HLS kernel completion
+
+`int PYNQ_waitForHLS(PYNQ_HLS* hls_state)`
+
+Waits for the HLS kernel at _hls_state_ to finish execution. An integer status code is returned indicating success or failure. 
+
+### Writing to the HLS kernel control port
+
+`int PYNQ_writeToHLS(PYNQ_HLS* hls_state, void* data, size_t offset, size_t length)`
+
+It is common for variables to be passed to the HLS kernel via the AXI-Lite control port (and also other aspects, such as setting the address of AXI slave ports.) This API call provides this, writing _length_ bytes from the _data_ pointer to the HLS kernel of _hls_state_ starting at memory location _offset_ which is relative to the start of the HLS kernel's memory region (i.e. writing to _0x00_ will write to the location commonly used by HLS as the status register). An integer status code is returned indicating success or failure. 
+
+### Reading from the HLS kernel control port
+
+`int PYNQ_readFromHLS(PYNQ_HLS* hls_state, void* data, size_t offset, size_t length)`
+
+It is common to read from the HLS kernel via the AXI-Lite control port (for instance returning data and sending data back via pointers in HLS). This API call provides this, reading _length_ bytes from the HLS kernel of _hls_state_ starting at memory location _offset_ which is relative to the start of the HLS kernel's memory region and putting this in the _data_ pointer. An integer status code is returned indicating success or failure. 
+
+### Closing the HLS block
+
+`int PYNQ_closeHLS(PYNQ_HLS* hls_state)`
+
+Will close the connection to the HLS block represented by _hls_state_. Note that this has no impact on the block itself and will not impact anything that is currently executing by it.
+
+
