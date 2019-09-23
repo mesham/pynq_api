@@ -4,6 +4,7 @@ This document describes the core PYNQ C API which is concerned around interactio
 
 * [Bitstream management](#bitstream-management)
 * [Memory-mapped IO (MMIO)](#memory-mapped-io-mmio)
+* [General purpose IO (GPIO)](#general-purpose-io-gpio)
 
 ## Bitstream management
 
