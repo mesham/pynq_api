@@ -3,6 +3,7 @@
 This part of the PYNQ API facilitates management of the Processing System (PS) i.e. ARM CPUs running Linux, and PS/PL interface.
 
 * [Working with the ARM architecture registers](#working-with-the-arm-architecture-registers)
+* [Clocks](#clocks)
 
 ## Working with the ARM architecture registers
 
