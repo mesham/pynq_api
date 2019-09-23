@@ -130,3 +130,31 @@ This call returns the status integer error code which should be tested for in us
 `int PYNQ_freeSharedMemory(PYNQ_SHARED_MEMORY* sm_state)`
 
 Will free the shared memory block associated with the _sm_state_ variable. Note that unlike libc and malloc, the underlying CMA library does not do this automatically for you on program termination. As such you should always issue this call as otherwise the memory can appear to run out and subsequent allocations only honoured if the interface is allowed to be reset as per the allocation call.
+
+## Userspace IO (UIO)
+
+The UIO interface is primarily used for tracking the raising of interrupts from the PL. These calls must be issued from containing code running as sudo
+
+### Opening UIO
+
+`int PYNQ_openUIO(PYNQ_UIO* uio_state, int irq)`
+
+This call will open the UIO port associated with the _irq_ interrupt number (as defined by the Zynq block rather than any other part of your block design). You should pass a pointer to an allocated variable of type _PYNQ_UIO_ which this function uses to store the state of that opened GPIO port. The status code is returned which indicates success or failure.
+
+### Testing for UIO
+
+`int PYNQ_checkForUIO(PYNQ_UIO* uio_state, int* flag)`
+
+This non-blocking call test whether there is an interrupt raised on the UIO port, as described by _uio_state_. The flag will either return -1 representing no interrupt raised or the interrupt index number as provided by the port.
+
+### Waiting for UIO
+
+`int PYNQ_waitForUIO(PYNQ_UIO* uio_state, int* flag)`
+
+This blocking call will wait for an interrupt to be raised on the UIO port, _uio_state_, and writes the interrupt identification number into the integer _flag_ variable who's pointer is provided to the function.
+
+### Closing UIO
+
+`int PYNQ_closeUIO(PYNQ_UIO* uio_state)`
+
+This API call will close the UIO port described by the _uio_state_ pointer provided to the call.
