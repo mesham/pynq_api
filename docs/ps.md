@@ -2,9 +2,11 @@
 
 This part of the PYNQ API facilitates management of the Processing System (PS) i.e. ARM CPUs running Linux, and PS/PL interface.
 
+* [Working with the ARM architecture registers](#working-with-the-arm-architecture-registers)
+
 ## Working with the ARM architecture registers
 
-The ARM CPU provides a number of registers which one might want to interact with for setting specific configuration conditions. This part of the API provides functionality to write to registers at the bit level, and all the reigster interaction calls must be issued from code running as sudo.
+The ARM CPU provides a number of registers which one might want to interact with for setting specific configuration conditions. This part of the API provides functionality to write to registers at the bit level, and all the register interaction calls must be issued from code running as sudo.
 
 ### Opening a register
 
@@ -41,3 +43,25 @@ This API call will read a continuous range of bits between bitwise location _sta
 `int PYNQ_closeRegister(PYNQ_REGISTER* reg_state)`
 
 Closes an opened register denoted by the _reg_state_ pointer.
+
+## Clocks
+
+Using this functionality one can obtain the frequency of the CPU clock and all the PL clocks. All frequencies are in megahertz (MHz) Users can also set the frequency of PL clocks to other values. All these calls must be issued from code running as sudo.
+
+### Getting CPU clock frequency
+
+`int PYNQ_getCPUClockFreq(float* cpu_clock_frequency)`
+
+This call retrieves the frequency of the ARM CPU (PS) clock in MHz and writes it to the float variable passed via the _cpu_clock_frequency_ pointer. This call returns an integer status flag indicating success or failure.
+
+### Getting PL clock frequency
+
+`int PYNQ_getPLClockFreq(unsigned int clock_index, float* pl_clock_frequency)`
+
+This API call retrieves the frequency of one of the four PL clock, as determined by _clock_index_ in MHz and writes it to the float variable passed via the _pl_clock_frequency_ pointer. This call returns an integer status flag indicating success or failure.
+
+### Setting PL clock frequency
+
+`int PYNQ_setPLClockFreq(unsigned int clock_index, float * freq, int * div0, int *div1)`
+
+This call sets the clock frequency of one of the four PL clock using the _freq_ float provided (in Mhz) along with the two divisors _div0_ and _div1_. Note that one of _div0_ or _div1_ must be provided, if both are provided then values are set directly from these, otherwise the missing divisor is automatically calculated based on the provided _freq_ and divisor. This call returns an integer status flag indicating success or failure.
