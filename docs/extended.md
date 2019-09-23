@@ -25,7 +25,7 @@ This call will set the interrupt mode for both the read and write DMA engines of
 
 `int PYNQ_writeDMA(PYNQ_AXI_DMA* dma_state, PYNQ_SHARED_MEMORY* shared_memory, size_t offset, size_t length)`
 
-This call will write _length_ bytes of data from the _shared_memory_ location in DRAM, starting at _offset_ which is relative to the start of this block of shared memory, to the DMA block of _dma_state_. An integer status code is returned indicating success or failure. 
+This call will write _length_ bytes of data from the _shared_memory_ location in DRAM, starting at _offset_ which is relative to the start of this block of shared memory, to the DMA block of _dma_state_. This is non-blocking, i.e. will return before the data transfer has completed, and issuing a write if there is already a write DMA transfer active will result in an error. An integer status code is returned indicating success or failure. 
 
 The example here will allocate some shared memory and then fill this up with integers ranging from 0 to 49. The DMA block whose control port is at memory location _0x4D00000_ is then opened and a write issued to the engine to copy the 50 integers from host DDR starting at location _0x0_ of the _shared_memory_ block to the PL. We then wait for the DMA to complete and then close the engine and free the shared memory.
 
@@ -43,3 +43,32 @@ PYNQ_closeDMA(&dma);
 
 PYNQ_freeSharedMemory(&shared_memory);
 ```
+### Reading from DMA
+
+`int PYNQ_readDMA(PYNQ_AXI_DMA* dma_state, PYNQ_SHARED_MEMORY* shared_memory, size_t offset, size_t length)`
+
+This call will read _length_ bytes of data from DMA engine and write to to the _shared_memory_ location in DRAM, starting at _offset_ which is relative to the start of this block of shared memory. This is non-blocking, i.e. will return before the data transfer has completed, and issuing a read if there is already a read DMA transfer active will result in an error. An integer status code is returned indicating success or failure. 
+
+### Issuing DMA transfers
+
+`int PYNQ_issueDMATransfer(PYNQ_AXI_DMA* dma_state, PYNQ_SHARED_MEMORY* shared_memory, size_t offset, size_t length, AXI_DMA_DIRECTION direction)`
+
+This call is very similar to the write and read calls, but instead the _direction_ of either _AXI_DMA_WRITE_ or _AXI_DMA_READ_ is provided which determines the direction of the DMA. This is non-blocking, i.e. will return before the data transfer has completed, and issuing a transfer on a channel already active with a DMA transfer will result in an error. An integer status code is returned indicating success or failure. 
+
+### Testing for DMA completion
+
+`int PYNQ_testForDMAComplete(PYNQ_AXI_DMA* dma_state, AXI_DMA_DIRECTION direction, int* flag)` 
+
+This API call will test a DMA transfer has completed, or more specifically whether a DMA engine, either the read or write channel, is idle or not. The _direction_ can be either _AXI_DMA_WRITE_ or _AXI_DMA_READ_ and the completion status is written into _flag_, zero representing not completed (e.g. busy, non-idle) and greater than zero indicating completed (e.g. idle). An integer status code is returned indicating success or failure. 
+
+### Waiting for DMA completion
+
+`int PYNQ_waitForDMAComplete(PYNQ_AXI_DMA* dma_state, AXI_DMA_DIRECTION direction)`
+
+This call will block and wait for a DMA transfer to complete. The _direction_ can be either _AXI_DMA_WRITE_ or _AXI_DMA_READ_ and an integer status code is returned indicating success or failure.  
+
+### Closing the DMA block
+
+`int PYNQ_closeDMA(PYNQ_AXI_DMA* dma_state)`
+
+This call will close the connection to the DMA block, _dma_state_, and stop the DMA engines. An integer status code is returned indicating success or failure. 
