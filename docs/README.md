@@ -26,4 +26,4 @@ PS | Programming System, the host ARM cores running Linux
 PL | Programmable Logic, the FPGA logic configured by the bitstream
 MMIO | Memory Mapped Input Output, memory connection to the IP blocks as configured by Vivado address editor
 GPIO | General Purpose Input Output, physical pins on the Pynq board
-UIO | User-space Input Output, functionality to track the raising of interrupts from the PL to the PS
+UIO | User-space Input Output, used to track the raising of interrupts from the PL to the PS
