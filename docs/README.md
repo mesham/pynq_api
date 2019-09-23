@@ -27,3 +27,6 @@ PL | Programmable Logic, the FPGA logic configured by the bitstream
 MMIO | Memory Mapped Input Output, memory connection to the IP blocks as configured by Vivado address editor
 GPIO | General Purpose Input Output, physical pins on the Pynq board
 UIO | User-space Input Output, used to track the raising of interrupts from the PL to the PS
+AXI | Point to point interconnect protocol designed for high performance
+HLS | High Level Synthesis, used to program IP blocks in C, C++ or System C
+DMA | Direct Memory Access, where the PL directly accesses host DRAM rather than through the PS
