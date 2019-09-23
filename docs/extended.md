@@ -122,4 +122,36 @@ It is common to read from the HLS kernel via the AXI-Lite control port (for inst
 
 Will close the connection to the HLS block represented by _hls_state_. Note that this has no impact on the block itself and will not impact anything that is currently executing by it.
 
+## AXI Interrupt controller
 
+The AXI interrupt controller provides block level functionality to connect to interrupts in the PL and then translate this to information over the AXI interface. This block can also generate an individual interrupt upon receiving any input interrupts, which can be connected to the Zynq block and read using <a href="https://github.com/mesham/pynq_api/blob/master/docs/core.md#userspace-io-uio">UIO</a>. All these AXI interrupt calls should be issued from code running on the PS as sudo.
+
+### Open interrupt controller
+
+`int PYNQ_openInterruptController(PYNQ_AXI_INTERRUPT_CONTROLLER* interrupt_ctrl_state, size_t base_address)`
+
+This call will open an AXI interrupt controller at memory location _base_address_, which is configured via the Vivado address editor. The user should define a variable of type _PYNQ_AXI_INTERRUPT_CONTROLLER_ in their code and pass a pointer to this to the function. This variable is then used as the context for subsequent interrupt calls. An integer status code is returned indicating success or failure. 
+
+### Register interrupt
+
+`int PYNQ_registerInterrupt(PYNQ_AXI_INTERRUPT_CONTROLLER* interrupt_ctrl_state, int irq, int generate_hw_interrupt)`
+
+This configures the _interrupt_ctrl_state_ AXI interrupt controller to also listen to an interrupt with index _irq_ (which is relative to this specific AXI interrupt controller). We use the word also here because an AXI interrupt controller might be listening for many different interrupts, and this register function will add to that. The _generate_hw_interrupt_ flag determines whether the interrupt controller will generate a hardware interrupt on it's port receipt of this interrupt. An integer status code is returned indicating success or failure. 
+
+### Testing for an interrupt
+
+`int PYNQ_testForInterrupt(PYNQ_AXI_INTERRUPT_CONTROLLER* interrupt_ctrl_state, int irq, int* flag)`
+
+This API call will test whether an interrupt with index _irq_ (which is relative to this specific AXI interrupt controller) has been received by the _interrupt_ctrl_state_ controller. This information is written into _flag_, zero representing no interrupt with this _irq_ has been received and greater than zero that one has been received. An integer status code is returned indicating success or failure. 
+
+### Waiting for an interrupt
+
+`int PYNQ_waitForInterrupt(PYNQ_AXI_INTERRUPT_CONTROLLER* interrupt_ctrl_state, int irq)`
+
+This API call will wait for an interrupt with index _irq_ (which is relative to this specific AXI interrupt controller) to be received by the _interrupt_ctrl_state_ controller. An integer status code is returned indicating success or failure. 
+
+### Closing the interrupt controller
+
+`int PYNQ_closeInterruptController(PYNQ_AXI_INTERRUPT_CONTROLLER* interrupt_ctrl_state)`
+
+This call closes the connection to the AXI interrupt controller, _interrupt_ctrl_state_. Note that it has no impact on the execution of this AXI controller and will not make any changes to whether interrupts are being listened to at the PL level. An integer status code is returned indicating success or failure. 
