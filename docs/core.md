@@ -42,11 +42,15 @@ MMIO is a crucial building block used for interacting with different parts of th
 
 ### Creating an MMIO window
 
-The API call `int PYNQ_createMMIOWindow(PYNQ_MMIO_WINDOW* mmio_state, size_t location_address, size_t length)` will create an MMIO window at a specific memory address, _location_address_, of size _length_ in bytes. A variable of type `PYNQ_MMIO_WINDOW` must be defined in user code and the pointer to this provided to the call which maintains state information about the MMIO window and it is not intended that user code interacts with any of the members of this data type directly. This call returns the status code as an integer, representing either success or failure.
+`int PYNQ_createMMIOWindow(PYNQ_MMIO_WINDOW* mmio_state, size_t location_address, size_t length)`
+
+This API call will create an MMIO window at a specific memory address, _location_address_, of size _length_ in bytes. A variable of type `PYNQ_MMIO_WINDOW` must be defined in user code and the pointer to this provided to the call which maintains state information about the MMIO window and it is not intended that user code interacts with any of the members of this data type directly. This call returns the status code as an integer, representing either success or failure.
 
 ### Writing to an MMIO window
 
-To write to an MMIO window then the `int PYNQ_writeMMIO(PYNQ_MMIO_WINDOW* mmio_state, void* data, size_t offset, size_t length)` should be used which will write _length_ bytes from the _data_ pointer provided to the window represented by _mmio_state_ starting at _offset_ which is relative from the start of the window, rather than an absolute memory address. 
+`int PYNQ_writeMMIO(PYNQ_MMIO_WINDOW* mmio_state, void* data, size_t offset, size_t length)`
+
+To write to an MMIO window then this call is used which will write _length_ bytes from the _data_ pointer provided to the window represented by _mmio_state_ starting at _offset_ which is relative from the start of the window, rather than an absolute memory address. 
 
 In the example below an MMIO window is created at absolute memory location _0x4C000000_ of size 2048 bytes. The _data_ integer pointer is declared, memory for 50 integers allocated and their values then set. This data is then written to the MMIO window _my_window_ at relative offset _0x0_ from the start of the window, writing _sizeof(int) * 50_ bytes of data from the _data_ pointer. Lastly the window is closed which will free up any associated memory. Note for brevity we are not checking the return status of these calls, which should be avoided in production codes.
 
@@ -61,8 +65,12 @@ PYNQ_closeMMIOWindow(&mywindow)
 
 ### Reading from an MMIO window
 
-The API call `int PYNQ_readMMIO(PYNQ_MMIO_WINDOW* mmio_state, void* data, size_t offset, size_t length)` reads _length_ bytes of data from the _mmio_state_ MMIO window starting at _offset_ which is relative to the start of the window and stores these bytes in the _data_ pointer provided.
+`int PYNQ_readMMIO(PYNQ_MMIO_WINDOW* mmio_state, void* data, size_t offset, size_t length)`
+
+This API call reads _length_ bytes of data from the _mmio_state_ MMIO window starting at _offset_ which is relative to the start of the window and stores these bytes in the _data_ pointer provided.
 
 ### Closing an MMIO window
 
-To close an MMIO window and free up associated memory the `int PYNQ_closeMMIOWindow(PYNQ_MMIO_WINDOW* mmio_state)` should be used which will close the window associated with _mmio_state_ in this example and return the status completion code.
+`int PYNQ_closeMMIOWindow(PYNQ_MMIO_WINDOW* mmio_state)`
+
+To close an MMIO window and free up associated memory this API call is used which will close the window associated with _mmio_state_ in this example and return the status completion code.
