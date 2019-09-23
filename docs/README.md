@@ -7,3 +7,13 @@ In this documents folder we have a number of separate file which discuss differe
 ## Error codes
 
 All PYNQ API functions return an integer error code which should be tested in user code. The _PYNQ_SUCCESS_ preprocessor define indicates that the call was successful, whereas _PYNQ_ERROR_ indicates that an error occured whilst executing the call. In the case of errors the API will also often print an associated error message to stderr providing further explanation.
+
+## Terminology
+
+Throughout this documentation you will see a number of acronyms, the common ones are explained here:
+
+
+Acronym | Description
+--------- | ----------- 
+PS | Programming System, the host ARM cores running Linux
+PL | Programmable Logic, the FPGA logic configured by the bitstream
