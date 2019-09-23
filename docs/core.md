@@ -1,4 +1,4 @@
-# Core API
+# Core PYNQ API
 
 This document describes the core PYNQ C API which is concerned around interaction with the ZYNQ IP block. This page contains information about
 
