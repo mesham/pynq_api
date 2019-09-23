@@ -3,6 +3,7 @@ This documentation describes parts of the PYNQ API that provide extended functio
 
 * [AXI Direct Memory Access (DMA)](#axi-direct-memory-access-dma)
 * [High Level Synthesis (HLS)](#high-level-synthesis-hls)
+* [AXI Interrupt Controller](#axi-interrupt-controller)
 
 ## AXI Direct Memory Access (DMA)
 
