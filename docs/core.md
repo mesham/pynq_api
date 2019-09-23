@@ -106,3 +106,26 @@ This call reads an integer from the GPIO pin already opened and represented by t
 `int PYNQ_closeGPIO(PYNQ_GPIO* gpio_state)`
 
 Will close the GPIO state of _gpio_state_ and free any associated memory
+
+## Shared memory
+
+If configured correctly, the Zynq PL can interact with the host DDR memory via the appropriate ports. This is very useful as it allows both the PS and PL to work with the same memory locations and also provides a much larger storage area than the limited on-chip BRAM. This shared memory functionality relies on the CMA library which must be also linked in to codes using the PYNQ API and this CMA library also requires pthreads, which again must be linked in.
+
+### Allocating shared memory
+
+`int PYNQ_allocatedSharedMemory(PYNQ_SHARED_MEMORY* sm_state, size_t length, int allow_reset)`
+
+This API call will allocate a block of shared memory of size _length_ bytes. In code the user should define a variable of type _PYNQ_SHARED_MEMORY_ and a pointer to this is passed to the API call. Effectively this allocated memory which is pinned to physical memory, and-so can not be swapped out to disk. Unlike many of these PYNQ API type, it is intended that user code will interact directly with members of this type, and the members of this structure should be used in user code, which are:
+
+Member name | C type | Description
+--------- | ----------- | -----------
+pointer | void * | Host (PS) pointer to memory in virtual memory
+physical_address | unsigned long | FPGA (PL) pointer to memory at it's physical location
+
+This call returns the status integer error code which should be tested for in user code. In some cases it might appear to the CMA library that there is not enough memory to honour the request, but this is just because previous calls to this function did not explicitly free the memory (and CMA does not do this for you on program termination.) This is the _allow_reset_ flag which, in the sitution where there is not enough memory, will reset the CMA interface and reattempt the memory allocation. This will trash any previous allocations, so should only be used when your code is the only one interacting with shared memory at that point in time.
+
+### Freeing shared memory
+
+`int PYNQ_freeSharedMemory(PYNQ_SHARED_MEMORY* sm_state)`
+
+Will free the shared memory block associated with the _sm_state_ variable. Note that unlike libc and malloc, the underlying CMA library does not do this automatically for you on program termination. As such you should always issue this call as otherwise the memory can appear to run out and subsequent allocations only honoured if the interface is allowed to be reset as per the allocation call.
