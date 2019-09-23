@@ -77,3 +77,31 @@ This API call reads _length_ bytes of data from the _mmio_state_ MMIO window sta
 `int PYNQ_closeMMIOWindow(PYNQ_MMIO_WINDOW* mmio_state)`
 
 To close an MMIO window and free up associated memory this API call is used which will close the window associated with _mmio_state_ in this example and return the status completion code.
+
+## General Purpose IO (GPIO)
+
+The PYNQ board contains a number of general purpose IO pins that you can interact with via the PYNQ API and appropriate block design. This functionality must be called from containing code running as sudo.
+
+### Opening GPIO
+
+`int PYNQ_openGPIO(PYNQ_GPIO* gpio_state, int index, char* direction)`
+
+Opens the GPIO port at location _index_, in a specified direction (either _in_ or _out_). The user should declare a variable of type _PYNQ_GPIO_ in their code and pass the pointer to this into the function. This variable then stores the state of that GPIO pin, and will open and close the actual pin lazily when the user reads or writes to it. The integer status code is returned, indicating either success or failure.
+
+### Writing to GPIO
+
+`int PYNQ_writeGPIO(PYNQ_GPIO* gpio_state, int* data)`
+
+This call writes an integer provided to this call as a pointer, _data_, to the GPIO pin already opened and represented by the _gpio_state_ pointer variable. The integer status code is returned, indicating either success or failure.
+
+### Reading from GPIO
+
+`int PYNQ_readGPIO(PYNQ_GPIO* gpio_state, int* data)`
+
+This call reads an integer from the GPIO pin already opened and represented by the _gpio_state_ pointer variable into the _data_ integer variable which is passed as a pointer. The integer status code is returned, indicating either success or failure.
+
+### Closing GPIO
+
+`int PYNQ_closeGPIO(PYNQ_GPIO* gpio_state)`
+
+Will close the GPIO state of _gpio_state_ and free any associated memory
