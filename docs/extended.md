@@ -6,4 +6,4 @@ This documentation describes parts of the PYNQ API that provide extended functio
 The AXI DMA block provides the ability to perform high performance burst transfers between PS DRAM and the PL. 
 
 
-(https://pynq.readthedocs.io/en/v2.3/_images/dma.png)
+![DMA illustration](https://pynq.readthedocs.io/en/v2.3/_images/dma.png)
