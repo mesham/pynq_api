@@ -3,7 +3,43 @@ This documentation describes parts of the PYNQ API that provide extended functio
 
 ## AXI Direct Memory Access (DMA)
 
-The AXI DMA block provides the ability to perform high performance burst transfers between PS DRAM and the PL. 
-
+The AXI DMA block provides the ability to perform high performance burst transfers between PS DRAM and the PL. In-fact the DMA IP block provides two channels, a read and write channel, along with a control bus (via AXI-Lite.) However the specifics of this can be ignored by the user when using the PYNQ API, apart from understanding that only one transfer per channel can take place at any point in time, but as the read and write channels are separate then transfers on these can occur concurrently. Note that DMA can only interact with data held in shared memory portion of DRAM, as per the <a href="https://github.com/mesham/pynq_api/blob/master/docs/core.md#shared-memory">shared memory</a> functionality in the core API.
 
 ![DMA illustration](https://pynq.readthedocs.io/en/v2.3/_images/dma.png)
+
+Code containing calls to the DMA functionality must be run as sudo.
+
+### Opening a DMA block
+
+`int PYNQ_openDMA(PYNQ_AXI_DMA* dma_state, size_t base_address)`
+
+This API call will open the DMA channel whose _base_address_ corresponds to the control bus address configured in the Vivado address editor. The user should define a variabe of type _PYNQ_AXI_DMA_ and pass a pointer to this to the open function, which is then used as the context for interaction with the the DMA IP block. This call will start both read and write DMA engines in non-interrupt mode (i.e. they will not generate an interrupt when transfers complete). An integer status code is returned indicating success or failure. 
+
+### Setting the DMA interrupt mode
+
+`int PYNQ_setDMATransferInterruptMode(PYNQ_AXI_DMA* dma_state, int interrupt_mode)`
+
+This call will set the interrupt mode for both the read and write DMA engines of the _dma_state_ block, raising an interrupt when transfers complete. The _interrupt_mode_ flag denoted whether the mode should be used (integer value greater than zero) or not (zero value.) If the mode changes from its current setting then the DMA engines will be reset, this should not be done whilst a transfer is in progress. An integer status code is returned indicating success or failure. 
+
+### Writing to DMA
+
+`int PYNQ_writeDMA(PYNQ_AXI_DMA* dma_state, PYNQ_SHARED_MEMORY* shared_memory, size_t offset, size_t length)`
+
+This call will write _length_ bytes of data from the _shared_memory_ location in DRAM, starting at _offset_ which is relative to the start of this block of shared memory, to the DMA block of _dma_state_. An integer status code is returned indicating success or failure. 
+
+The example here will allocate some shared memory and then fill this up with integers ranging from 0 to 49. The DMA block whose control port is at memory location _0x4D00000_ is then opened and a write issued to the engine to copy the 50 integers from host DDR starting at location _0x0_ of the _shared_memory_ block to the PL. We then wait for the DMA to complete and then close the engine and free the shared memory.
+
+```c
+PYNQ_SHARED_MEMORY shared_memory;
+PYNQ_allocatedSharedMemory(&shared_memory, 2048, 1);
+int * data=(int*) shared_memory.pointer;
+for (int i=0;i<50;i++) data[i]=i;
+
+PYNQ_AXI_DMA dma;
+PYNQ_openDMA(&dma, 0x4D00000);
+PYNQ_writeDMA(&dma, &shared_memory, 0x0, sizeof(int)*50);
+PYNQ_waitForDMAComplete(&shared_memory, AXI_DMA_WRITE);
+PYNQ_closeDMA(&dma);
+
+PYNQ_freeSharedMemory(&shared_memory);
+```
