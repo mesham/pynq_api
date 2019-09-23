@@ -1,4 +1,4 @@
-# PS side of PYNQ API
+# Programmable System PYNQ API
 
 This part of the PYNQ API facilitates management of the Processing System (PS) i.e. ARM CPUs running Linux, and PS/PL interface.
 
