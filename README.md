@@ -4,7 +4,7 @@ This project is a C based API for interacting with the 7-Series Zynq on the Pynq
 
 The idea of this work is to provide an alternative to the Python drivers that ship with the Pynq board, so that people can experiment with intergrating their existing codes onto the FPGA and interacting with these. The design of this API is very simple and as such should be trivial to wrap in bindings for other languages such as Fortran and Java.
 
-See the <a href="https://github.com/mesham/pynq_api/edit/master/docs/README.md">documentation</a> for a detailed description of the API calls and functionality.
+See the <a href="https://github.com/mesham/pynq_api/tree/master/docs">documentation</a> for a detailed description of the API calls and functionality.
 
 ## Installation
 
