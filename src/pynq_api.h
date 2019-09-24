@@ -44,8 +44,11 @@ typedef struct mmio_state_struct {
   unsigned int length, address_base, virt_base, virt_offset;
 } PYNQ_MMIO_WINDOW;
 
+typedef enum gpio_direction_emum { GPIO_OUT=0, GPIO_IN=1 } GPIO_DIRECTION;
+
 typedef struct gpio_state_struct {
-  int index, direction; // direction is 0 for out and 1 for everything else (specifically in)
+  int index;
+  GPIO_DIRECTION direction;
   char * filename;
 } PYNQ_GPIO;
 
@@ -60,7 +63,7 @@ typedef struct shared_memory_state_struct {
   unsigned long physical_address;
 } PYNQ_SHARED_MEMORY;
 
-typedef enum axi_dma_direction_struct { AXI_DMA_WRITE=0, AXI_DMA_READ=1 } AXI_DMA_DIRECTION;
+typedef enum axi_dma_direction_enum { AXI_DMA_WRITE=0, AXI_DMA_READ=1 } AXI_DMA_DIRECTION;
 
 typedef struct axi_dma_transfer_struct {
   PYNQ_MMIO_WINDOW mmio_window;
@@ -116,13 +119,13 @@ int PYNQ_createMMIOWindow(PYNQ_MMIO_WINDOW* mmio_state, size_t address, size_t l
 int PYNQ_closeMMIOWindow(PYNQ_MMIO_WINDOW* mmio_state);
 int PYNQ_writeMMIO(PYNQ_MMIO_WINDOW* mmio_state, void* data, size_t offset, size_t length);
 int PYNQ_readMMIO(PYNQ_MMIO_WINDOW* mmio_state, void* data, size_t offset, size_t length);
-int PYNQ_openGPIO(PYNQ_GPIO* gpio_state, int index, char* direction);
+int PYNQ_openGPIO(PYNQ_GPIO* gpio_state, int index, GPIO_DIRECTION direction);
 int PYNQ_closeGPIO(PYNQ_GPIO* gpio_state);
 int PYNQ_writeGPIO(PYNQ_GPIO* gpio_state, int* data);
 int PYNQ_readGPIO(PYNQ_GPIO* gpio_state, int* data);
 int PYNQ_loadBitstream(char* filename);
 int PYNQ_extractBitstreamInfo(PYNQ_BITSTREAM_INFO* info, char* filename);
-int PYNQ_freeBitstreamInfo(PYNQ_BITSTREAM_INFO* );
+int PYNQ_freeBitstreamInfo(PYNQ_BITSTREAM_INFO* info);
 
 // HLS API
 int PYNQ_openHLS(PYNQ_HLS* hls_state, size_t address, size_t width);

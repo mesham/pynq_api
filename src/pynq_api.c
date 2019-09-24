@@ -696,9 +696,9 @@ int PYNQ_readMMIO(PYNQ_MMIO_WINDOW * state, void * data, size_t offset, size_t s
 /**
 * Opens a General Purpose I/O (GPIO) port at a specified index with direction provided
 */
-int PYNQ_openGPIO(PYNQ_GPIO * state, int index, char * direction) {
+int PYNQ_openGPIO(PYNQ_GPIO * state, int index, GPIO_DIRECTION direction) {
   state->index=index;
-  state->direction=strcmp(direction, "out");
+  state->direction=direction;
 
   char path[150], export_path[150];
   sprintf(path, "%s/gpio%d", GPIO_PATH, index);
@@ -719,7 +719,15 @@ int PYNQ_openGPIO(PYNQ_GPIO * state, int index, char * direction) {
     fprintf(stderr, "Can not open '%s' to create GPIO\n", f_name);
     return PYNQ_ERROR;
   }
-  fprintf(handle, "%s", direction);
+  if (direction == GPIO_OUT) {
+    fprintf(handle, "out");
+  } else if (direction == GPIO_IN) {
+    fprintf(handle, "in");
+  } else {
+    fclose(handle);
+    fprintf(stderr, "Must either supply GPIO_OUT or GPIO_IN as GPIO direction in open call\n");
+    return PYNQ_ERROR;
+  }
   fclose(handle);
 
   state->filename=(char*) malloc(strlen(path) + 7);
@@ -749,7 +757,7 @@ int PYNQ_closeGPIO(PYNQ_GPIO * state) {
 * Writes some data, val, to the GPIO that we have previously opened
 */
 int PYNQ_writeGPIO(PYNQ_GPIO * state, int * val) {
-  FILE * file_handle=fopen(state->filename, state->direction==0 ? "w" : "r");
+  FILE * file_handle=fopen(state->filename, state->direction==GPIO_OUT ? "w" : "r");
   if (file_handle == NULL) {
     fprintf(stderr, "Can not open '%s' to write to GPIO\n", state->filename);
     return PYNQ_ERROR;
@@ -763,7 +771,7 @@ int PYNQ_writeGPIO(PYNQ_GPIO * state, int * val) {
 * Reads some data, val, from the GPIO that we have previously opened
 */
 int PYNQ_readGPIO(PYNQ_GPIO * state, int * val) {
-  FILE * file_handle=fopen(state->filename, state->direction==0 ? "w" : "r");
+  FILE * file_handle=fopen(state->filename, state->direction==GPIO_OUT ? "w" : "r");
   if (file_handle == NULL) {
     fprintf(stderr, "Can not open '%s' to read from GPIO\n", state->filename);
     return PYNQ_ERROR;
