@@ -555,6 +555,10 @@ int PYNQ_setDMATransferInterruptMode(PYNQ_AXI_DMA * state, int interrupt_mode) {
 int PYNQ_issueDMATransfer(PYNQ_AXI_DMA * state, PYNQ_SHARED_MEMORY * sm_state, size_t data_offset,
     size_t length, AXI_DMA_DIRECTION direction) {
 
+  if (direction != AXI_DMA_WRITE && direction != AXI_DMA_READ) {
+    fprintf(stderr, "You must supply either AXI_DMA_WRITE or AXI_DMA_READ as the transfer DMA direction\n");
+    return PYNQ_ERROR;
+  }
   return issueDMATransfer(state, sm_state, data_offset, length, direction);
 }
 
@@ -579,7 +583,11 @@ int PYNQ_readDMA(PYNQ_AXI_DMA * state, PYNQ_SHARED_MEMORY * sm_state, size_t off
 * if the user enabled interrupts
 */
 int PYNQ_testForDMAComplete(PYNQ_AXI_DMA * state, AXI_DMA_DIRECTION direction, int * flag) {
- if (!isDMAChannelRunning(state, AXI_DMA_WRITE)) {
+  if (direction != AXI_DMA_WRITE && direction != AXI_DMA_READ) {
+    fprintf(stderr, "You must supply either AXI_DMA_WRITE or AXI_DMA_READ as the transfer DMA direction\n");
+    return PYNQ_ERROR;
+  }
+  if (!isDMAChannelRunning(state, AXI_DMA_WRITE)) {
     fprintf(stderr, "Error testing DMA completion status as engine is not running\n");
     return PYNQ_ERROR;
   }
@@ -591,6 +599,10 @@ int PYNQ_testForDMAComplete(PYNQ_AXI_DMA * state, AXI_DMA_DIRECTION direction, i
 * Waits fo DMA to complete in a specified direction
 */
 int PYNQ_waitForDMAComplete(PYNQ_AXI_DMA * state, AXI_DMA_DIRECTION direction) {
+  if (direction != AXI_DMA_WRITE && direction != AXI_DMA_READ) {
+    fprintf(stderr, "You must supply either AXI_DMA_WRITE or AXI_DMA_READ as the transfer DMA direction\n");
+    return PYNQ_ERROR;
+  }
   if (!isDMAChannelRunning(state, AXI_DMA_WRITE)) {
     fprintf(stderr, "Error waiting for DMA completion as engine is not running");
     return PYNQ_ERROR;
