@@ -99,6 +99,7 @@ typedef struct hls_struct {
 unsigned long long PYNQ_Wtime();
 int PYNQ_getCPUClockFreq(float* frequency);
 int PYNQ_getPLClockFreq(unsigned int clock_index, float* frequency);
+int PYNQ_setPLClockFreq(unsigned int clock_index, float * freq, int * div0, int *div1);
 int PYNQ_openRegister(PYNQ_REGISTER* reg_state, size_t address, size_t width);
 int PYNQ_readRegister(PYNQ_REGISTER* reg_state, size_t address, int index, unsigned int* data);
 int PYNQ_readRegisterRange(PYNQ_REGISTER* reg_state, size_t address, int start_index, int end_index, unsigned int* data);
