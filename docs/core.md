@@ -110,9 +110,9 @@ The PYNQ board contains a number of general purpose IO pins that you can interac
 
 ### Opening GPIO
 
-`int PYNQ_openGPIO(PYNQ_GPIO* gpio_state, int index, char* direction)`
+`int PYNQ_openGPIO(PYNQ_GPIO* gpio_state, int index, GPIO_DIRECTION direction)`
 
-Opens the GPIO port at location _index_, in a specified direction (either _in_ or _out_). The user should declare a variable of type _PYNQ_GPIO_ in their code and pass the pointer to this into the function. This variable then stores the state of that GPIO pin, and will open and close the actual pin lazily when the user reads or writes to it. The integer status code is returned, indicating either success or failure.
+Opens the GPIO port at location _index_, in a specified direction (either _GPIO_OUT_ or _GPIO_IN_ which are members of the _GPIO_DIRECTION_ enumeration). The user should declare a variable of type _PYNQ_GPIO_ in their code and pass the pointer to this into the function. This variable then stores the state of that GPIO pin, and will open and close the actual pin lazily when the user reads or writes to it. The integer status code is returned, indicating either success or failure.
 
 ### Writing to GPIO
 
