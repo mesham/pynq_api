@@ -459,11 +459,21 @@ int PYNQ_waitForUIO(PYNQ_UIO * state, int * flag) {
   if (!state->active) {
     if (enable_uio(state) == PYNQ_ERROR) return PYNQ_ERROR;
   }
-  int f = open(state->filename, O_RDONLY);
+  int f = open(state->filename, O_RDWR);
   if (f == -1) {
     fprintf(stderr, "Error opening UIO file '%s'\n", state->filename);
     return PYNQ_ERROR;
   }
+
+  uint32_t info = 1; // unmask first interrupt
+  ssize_t nb = write(f, &info, sizeof(info));
+  if (nb != (ssize_t)sizeof(info)) {
+    perror("ERROR: Write to UIO descriptor failed");
+    close(f);
+    exit(EXIT_FAILURE);
+  }
+
+
   int data;
   int code=read(f, &data, sizeof(int));
   if (code != sizeof(int)) {
