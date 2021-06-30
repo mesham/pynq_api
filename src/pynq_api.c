@@ -794,9 +794,13 @@ int PYNQ_readGPIO(PYNQ_GPIO * state, int * val) {
 }
 
 /**
-* Loads the bitstream with name and location, bitstream_name, onto the PL and activates it.
+* Loads the bitstream with name and location, bitstream_name, onto the PL and activates it. 
+* Pass partial==0 for full bitstream configuration and partial==1 for partial bitstream.
 */
-int PYNQ_loadBitstream(char * bitstream_name) {
+int PYNQ_loadBitstream(char * bitstream_name, int partial) {
+  if (partial != 0 && partial != 1)
+    fprintf(stderr, "Unrecognized loadBitstream flag\n");
+
   int bitstream_payload_length;
   char * bitstream_payload=extractBitstreamPayload(bitstream_name, &bitstream_payload_length);
 
@@ -821,7 +825,7 @@ int PYNQ_loadBitstream(char * bitstream_name) {
     free(binfile_name);
     return PYNQ_ERROR;
   }
-  fprintf(fptr, "0");
+  fprintf(fptr, "%d", partial);
   fclose(fptr);
 
   fptr = fopen(BS_FPGA_MAN, "w");
