@@ -459,11 +459,21 @@ int PYNQ_waitForUIO(PYNQ_UIO * state, int * flag) {
   if (!state->active) {
     if (enable_uio(state) == PYNQ_ERROR) return PYNQ_ERROR;
   }
-  int f = open(state->filename, O_RDONLY);
+  int f = open(state->filename, O_RDWR);
   if (f == -1) {
     fprintf(stderr, "Error opening UIO file '%s'\n", state->filename);
     return PYNQ_ERROR;
   }
+
+  uint32_t info = 1; // unmask first interrupt
+  ssize_t nb = write(f, &info, sizeof(info));
+  if (nb != (ssize_t)sizeof(info)) {
+    perror("ERROR: Write to UIO descriptor failed");
+    close(f);
+    exit(EXIT_FAILURE);
+  }
+
+
   int data;
   int code=read(f, &data, sizeof(int));
   if (code != sizeof(int)) {
@@ -794,9 +804,13 @@ int PYNQ_readGPIO(PYNQ_GPIO * state, int * val) {
 }
 
 /**
-* Loads the bitstream with name and location, bitstream_name, onto the PL and activates it.
+* Loads the bitstream with name and location, bitstream_name, onto the PL and activates it. 
+* Pass partial==0 for full bitstream configuration and partial==1 for partial bitstream.
 */
-int PYNQ_loadBitstream(char * bitstream_name) {
+int PYNQ_loadBitstream(char * bitstream_name, int partial) {
+  if (partial != 0 && partial != 1)
+    fprintf(stderr, "Unrecognized loadBitstream flag\n");
+
   int bitstream_payload_length;
   char * bitstream_payload=extractBitstreamPayload(bitstream_name, &bitstream_payload_length);
 
@@ -821,7 +835,7 @@ int PYNQ_loadBitstream(char * bitstream_name) {
     free(binfile_name);
     return PYNQ_ERROR;
   }
-  fprintf(fptr, "0");
+  fprintf(fptr, "%d", partial);
   fclose(fptr);
 
   fptr = fopen(BS_FPGA_MAN, "w");

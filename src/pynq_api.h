@@ -123,7 +123,7 @@ int PYNQ_openGPIO(PYNQ_GPIO* gpio_state, int index, GPIO_DIRECTION direction);
 int PYNQ_closeGPIO(PYNQ_GPIO* gpio_state);
 int PYNQ_writeGPIO(PYNQ_GPIO* gpio_state, int* data);
 int PYNQ_readGPIO(PYNQ_GPIO* gpio_state, int* data);
-int PYNQ_loadBitstream(char* filename);
+int PYNQ_loadBitstream(char* filename, int partial);
 int PYNQ_extractBitstreamInfo(PYNQ_BITSTREAM_INFO* info, char* filename);
 int PYNQ_freeBitstreamInfo(PYNQ_BITSTREAM_INFO* info);
 
