@@ -76,6 +76,7 @@ typedef struct uio_struct {
   char * filename;
   unsigned char active;
   int irq;
+  int file_descriptor;
 } PYNQ_UIO;
 
 struct raised_interrupt_struct {
@@ -130,6 +131,7 @@ int PYNQ_freeBitstreamInfo(PYNQ_BITSTREAM_INFO* info);
 // HLS API
 int PYNQ_openHLS(PYNQ_HLS* hls_state, size_t address, size_t width);
 int PYNQ_startHLS(PYNQ_HLS* hls_state);
+int PYNQ_stopHLS(PYNQ_HLS* hls_state);
 int PYNQ_testHLSCompleted(PYNQ_HLS* hls_state, int* flag);
 int PYNQ_waitForHLS(PYNQ_HLS* hls_state);
 int PYNQ_writeToHLS(PYNQ_HLS* hls_state, void* data, size_t offset, size_t length);

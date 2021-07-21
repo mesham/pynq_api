@@ -88,6 +88,7 @@ static char * extractBitstreamPayload(char*, int*);
 static void extractBitstreamInfo(char*, PYNQ_BITSTREAM_INFO*);
 static char * readRawBitfile(char*);
 static void freeHeader(PYNQ_BITSTREAM_INFO*);
+static int PYNQ_setupUIO(PYNQ_UIO * state);
 
 /**
 * Returns the time in microseconds since the epoch
@@ -112,6 +113,11 @@ int PYNQ_openHLS(PYNQ_HLS * state, size_t address, size_t width) {
 */
 int PYNQ_startHLS(PYNQ_HLS * state) {
   char byte_command=1;
+  return PYNQ_writeMMIO(&(state->mmio_window), &byte_command, 0x0, sizeof(char));
+}
+
+int PYNQ_stopHLS(PYNQ_HLS * state) {
+  char byte_command=0;
   return PYNQ_writeMMIO(&(state->mmio_window), &byte_command, 0x0, sizeof(char));
 }
 
@@ -451,36 +457,53 @@ int PYNQ_openUIO(PYNQ_UIO * state, int irq) {
   return PYNQ_SUCCESS;
 }
 
+int PYNQ_setupUIO(PYNQ_UIO * state) {
+  if (!state->active) {
+    if (enable_uio(state) == PYNQ_ERROR) return PYNQ_ERROR;
+  }
+  state->file_descriptor = open(state->filename, O_RDWR);
+  if (state->file_descriptor == -1) {
+    fprintf(stderr, "Error opening UIO file '%s'\n", state->filename);
+    return PYNQ_ERROR;
+  }
+
+  // uint32_t info = 1; // unmask first interrupt
+  // ssize_t nb = write(state->file_descriptor, &info, sizeof(info));
+  // printf("Enabled interrupt\n");
+  // if (nb != (ssize_t)sizeof(info)) {
+  //   perror("ERROR: Write to UIO descriptor failed");
+  //   close(state->file_descriptor);
+  //   exit(EXIT_FAILURE);
+  // }
+}
+
 /**
 * Waits for the UIO to detect the raised interrupt and returns the interrupt count (i.e. the sequence number
 * of the raised interrupt which can be useful to ensure the code has not missed interrupts)
 */
 int PYNQ_waitForUIO(PYNQ_UIO * state, int * flag) {
-  if (!state->active) {
-    if (enable_uio(state) == PYNQ_ERROR) return PYNQ_ERROR;
-  }
-  int f = open(state->filename, O_RDWR);
-  if (f == -1) {
-    fprintf(stderr, "Error opening UIO file '%s'\n", state->filename);
-    return PYNQ_ERROR;
+  static int first_call = 1;
+
+  if (first_call) {
+    PYNQ_setupUIO(state);
+    first_call = 0;
   }
 
   uint32_t info = 1; // unmask first interrupt
-  ssize_t nb = write(f, &info, sizeof(info));
+  ssize_t nb = write(state->file_descriptor, &info, sizeof(info));
   if (nb != (ssize_t)sizeof(info)) {
     perror("ERROR: Write to UIO descriptor failed");
-    close(f);
+    close(state->file_descriptor);
     exit(EXIT_FAILURE);
   }
 
-
   int data;
-  int code=read(f, &data, sizeof(int));
+  int code=read(state->file_descriptor, &data, sizeof(int));
   if (code != sizeof(int)) {
     fprintf(stderr, "Expected to read 32 bit interrupt from '%s' but got %d bytes\n", state->filename, code);
     return PYNQ_ERROR;
   }
-  close(f);
+  //close(f);
   state->active=0;
   *flag=data;
   return PYNQ_SUCCESS;
@@ -522,6 +545,7 @@ int PYNQ_checkForUIO(PYNQ_UIO * state, int * flag) {
 */
 int PYNQ_closeUIO(PYNQ_UIO * state) {
   free(state->filename);
+  close(state->file_descriptor);
   return PYNQ_SUCCESS;
 }
 
