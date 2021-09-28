@@ -14,9 +14,13 @@ The PYNQ API provides two general pieces of functionality for interacting with b
 
 ### Loading the bitstream onto the PL
 
-`int PYNQ_loadBitstream(char* filename, int partial)`
+`int PYNQ_loadBitstream(char* filename)`
 
 This API call takes in the filename of the bitstream and a flag denoting whether it is performing partial reconfiguration or not, and will load this into the PL, returning the completion status of this back to user code.
+
+`int PYNQ_PYNQ_loadPartialBitstream(char* filename)`
+
+Similar to the previous call, but used for loading partial bitstreams onto the PL.
 
 ### Extracting bitstream information
 

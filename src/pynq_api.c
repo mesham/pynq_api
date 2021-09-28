@@ -88,6 +88,7 @@ static char * extractBitstreamPayload(char*, int*);
 static void extractBitstreamInfo(char*, PYNQ_BITSTREAM_INFO*);
 static char * readRawBitfile(char*);
 static void freeHeader(PYNQ_BITSTREAM_INFO*);
+static int loadBitstream(char *, int);
 
 /**
 * Returns the time in microseconds since the epoch
@@ -804,10 +805,47 @@ int PYNQ_readGPIO(PYNQ_GPIO * state, int * val) {
 }
 
 /**
+* Loads the full bitstream with name and location, bitstream_name, onto the PL and activates it.
+*/
+int PYNQ_loadBitstream(char* filename) {
+  return loadBitstream(filename, 0);
+}
+
+/**
+* Loads the partial bitstream with name and location, bitstream_name, onto the PL and activates it.
+*/
+int PYNQ_loadPartialBitstream(char* filename) {
+  return loadBitstream(filename, 1);
+}
+
+/**
+* Extracs information from the bit stream, bitstream_name, into the header type. This contains both the header information
+* and payload data.
+*/
+int PYNQ_extractBitstreamInfo(PYNQ_BITSTREAM_INFO * bitstream_header, char * bitstream_name) {
+  extractBitstreamInfo(bitstream_name, bitstream_header);
+  return PYNQ_SUCCESS;
+}
+
+/**
+* Frees the memory associated with bitstream information type that was previously used to extract the information from
+* the bit stream into.
+*/
+int PYNQ_freeBitstreamInfo(PYNQ_BITSTREAM_INFO * header) {
+  free(header->data);
+  free(header->design);
+  free(header->date);
+  free(header->part);
+  free(header->time);
+  free(header->version);
+  return PYNQ_SUCCESS;
+}
+
+/**
 * Loads the bitstream with name and location, bitstream_name, onto the PL and activates it. 
 * Pass partial==0 for full bitstream configuration and partial==1 for partial bitstream.
 */
-int PYNQ_loadBitstream(char * bitstream_name, int partial) {
+static int loadBitstream(char * bitstream_name, int partial) {
   if (partial != 0 && partial != 1)
     fprintf(stderr, "Unrecognized loadBitstream flag\n");
 
@@ -846,29 +884,6 @@ int PYNQ_loadBitstream(char * bitstream_name, int partial) {
   fprintf(fptr, "%s", binfile_name);
   fclose(fptr);
   free(binfile_name);
-  return PYNQ_SUCCESS;
-}
-
-/**
-* Extracs information from the bit stream, bitstream_name, into the header type. This contains both the header information
-* and payload data.
-*/
-int PYNQ_extractBitstreamInfo(PYNQ_BITSTREAM_INFO * bitstream_header, char * bitstream_name) {
-  extractBitstreamInfo(bitstream_name, bitstream_header);
-  return PYNQ_SUCCESS;
-}
-
-/**
-* Frees the memory associated with bitstream information type that was previously used to extract the information from
-* the bit stream into.
-*/
-int PYNQ_freeBitstreamInfo(PYNQ_BITSTREAM_INFO * header) {
-  free(header->data);
-  free(header->design);
-  free(header->date);
-  free(header->part);
-  free(header->time);
-  free(header->version);
   return PYNQ_SUCCESS;
 }
 
