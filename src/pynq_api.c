@@ -44,6 +44,8 @@
 #include <sys/utsname.h>
 #include "pynq_api.h"
 #include "libxlnk_cma.h"
+#include <errno.h>
+#include <signal.h>
 
 // These three definitions are used for writing the bitstream payload to the PL and launching it
 #define BS_FPGA_MAN_FLAGS "/sys/class/fpga_manager/fpga0/flags"
@@ -490,18 +492,32 @@ int PYNQ_waitForUIO(PYNQ_UIO * state, int * flag) {
   }
 
   uint32_t info = 1; // unmask first interrupt
-  ssize_t nb = write(state->file_descriptor, &info, sizeof(info));
-  if (nb != (ssize_t)sizeof(info)) {
-    perror("ERROR: Write to UIO descriptor failed");
-    close(state->file_descriptor);
-    exit(EXIT_FAILURE);
+  // Write recoverable when interrupted by SIGINT. Allows the use of signals with the library
+  while(1) {
+      ssize_t nb = write(state->file_descriptor, &info, sizeof(info));
+      if (nb != (ssize_t)sizeof(info)) {
+          if(errno != EINTR) {
+            perror("ERROR: Write to UIO descriptor failed");
+            close(state->file_descriptor);
+            exit(EXIT_FAILURE);
+          }
+      }
+      else
+          break;
   }
 
   int data;
-  int code=read(state->file_descriptor, &data, sizeof(int));
-  if (code != sizeof(int)) {
-    fprintf(stderr, "Expected to read 32 bit interrupt from '%s' but got %d bytes\n", state->filename, code);
-    return PYNQ_ERROR;
+  // Read recoverable when interrupted by SIGINT. Allows the use of signals with the library
+  while(1) {
+      int code=read(state->file_descriptor, &data, sizeof(int));
+      if (code != sizeof(int)) {
+        if(errno != EINTR) {
+            fprintf(stderr, "Expected to read 32 bit interrupt from '%s' but got %d bytes\n", state->filename, code);
+            return PYNQ_ERROR;
+        }
+      }
+      else
+          break;
   }
   //close(f);
   state->active=0;
@@ -837,11 +853,13 @@ int PYNQ_loadBitstream(char * bitstream_name, int partial) {
 
   int bitstream_payload_length;
   char * bitstream_payload=extractBitstreamPayload(bitstream_name, &bitstream_payload_length);
+  printf("Payload length: %d\n", bitstream_payload_length);
 
   char * base_name=getBaseNameFromFile(bitstream_name);
   char * binfile_name=getBinNameFromBit(base_name);
   char firmware_path[strlen(binfile_name) + strlen(FIRMWARE_PATH_PREFIX)+1];
   sprintf(firmware_path, "%s%s", FIRMWARE_PATH_PREFIX, binfile_name);
+  printf("Firmware path: %s\n", firmware_path);
   FILE * f =fopen(firmware_path, "wb");
   if (f == NULL) {
     fprintf(stderr, "Can not open firmware file '%s'\n", firmware_path);
@@ -849,6 +867,7 @@ int PYNQ_loadBitstream(char * bitstream_name, int partial) {
     free(binfile_name);
     return PYNQ_ERROR;
   }
+  printf("Before writing payload\n");
   fwrite(bitstream_payload, sizeof(char), bitstream_payload_length, f);
   fclose(f);
   free(bitstream_payload);
@@ -859,17 +878,22 @@ int PYNQ_loadBitstream(char * bitstream_name, int partial) {
     free(binfile_name);
     return PYNQ_ERROR;
   }
+  printf("Before writing partial (%d) flag\n", partial);
   fprintf(fptr, "%d", partial);
   fclose(fptr);
+  printf("After closing flags file\n");
 
   fptr = fopen(BS_FPGA_MAN, "w");
   if (fptr == NULL) {
     fprintf(stderr, "Can not open man file '%s'\n", BS_FPGA_MAN);
     return PYNQ_ERROR;
   }
+  printf("Before writing binary file name (%s)\n", binfile_name);
   fprintf(fptr, "%s", binfile_name);
   fclose(fptr);
   free(binfile_name);
+  printf("After writing binary file name\n");
+
   return PYNQ_SUCCESS;
 }
 
@@ -1211,6 +1235,7 @@ static char * extractBitstreamPayload(char * filename, int * data_len) {
       offset+=2+length;
     }
   }
+  free(rawBitData);
   return data_buffer;
 }
 
