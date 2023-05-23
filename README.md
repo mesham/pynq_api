@@ -12,7 +12,7 @@ Clone or download the repository onto your Pynq board and then issue ``make``. O
 
 ## Usage
 
-You should include the ``pynq_api.h`` header file in your codes, in order to link the code you will need to link against the ``pynq_api``, ``cma`` and ``pthread`` library. I.e. ``gcc -o my_code my_code.c -lpynq_api -lcma -lpthread``
+You should include the ``pynq_api.h`` header file in your codes, in order to link the code you will need to link against the ``pynq``, ``cma`` and ``pthread`` library. I.e. ``gcc -o my_code my_code.c -lpynq -lcma -lpthread``
 
 ## Example usage
 
