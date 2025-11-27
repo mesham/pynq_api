@@ -704,7 +704,7 @@ int PYNQ_closeMMIOWindow(PYNQ_MMIO_WINDOW * state) {
 * Writes some data, of provided size to the specified offset in the memory window
 */
 int PYNQ_writeMMIO(PYNQ_MMIO_WINDOW * state, void * data, size_t offset, size_t size_data) {
-  memcpy(&(state->buffer[offset]), data, size_data);
+  memcpy(&(state->buffer[state->virt_offset + offset]), data, size_data);
   return PYNQ_SUCCESS;
 }
 
@@ -712,7 +712,7 @@ int PYNQ_writeMMIO(PYNQ_MMIO_WINDOW * state, void * data, size_t offset, size_t 
 * Reads some data, of provided size to the specified offset from the memory window
 */
 int PYNQ_readMMIO(PYNQ_MMIO_WINDOW * state, void * data, size_t offset, size_t size_data) {
-  memcpy(data, &(state->buffer[offset]), size_data);
+  memcpy(data, &(state->buffer[state->virt_offset + offset]), size_data);
   return PYNQ_SUCCESS;
 }
 
